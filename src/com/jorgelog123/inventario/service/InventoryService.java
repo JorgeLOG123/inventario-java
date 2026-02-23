@@ -3,7 +3,9 @@ package com.jorgelog123.inventario.service;
 import com.jorgelog123.inventario.domain.InventoryItem;
 import com.jorgelog123.inventario.domain.Product;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public final class InventoryService {
 
@@ -44,25 +46,33 @@ public final class InventoryService {
 
     }
 
-    public int getStock(String sku){
-      return getItemOrThrow(sku).getQuantity();
+    public int getStock(String sku) {
+        return getItemOrThrow(sku).getQuantity();
 
     }
 
 
-    private InventoryItem getItemOrThrow (String sku){
+    private InventoryItem getItemOrThrow(String sku) {
 
-        if(sku == null || sku.isBlank()){
+        if (sku == null || sku.isBlank()) {
             throw new IllegalArgumentException("sku cannot be null/blank");
         }
         InventoryItem item = items.get(sku);
-        if(item == null){
+        if (item == null) {
             throw new IllegalArgumentException("SKU not found " + sku);
         }
         return item;
     }
 
-
-
-
+    public List<InventoryItem> listLowStock() {
+        // TODO 1: crear lista resultados
+        List<InventoryItem> result = new ArrayList<>();
+        // TODO 2: recorrer items.values()
+        for (InventoryItem item : items.values()) {
+            if (item.isLowStock()) {
+                result.add(item);
+            }
+        }
+        return result;
+    }
 }

@@ -84,5 +84,25 @@ public class Main {
             System.out.println("Error esperado (sku null): " + e.getMessage());
         }
 
+        // --- LOW STOCK TEST ---
+        System.out.println("\n=== LOW STOCK ITEMS ===");
+
+        var low = service.listLowStock();
+
+        if (low.isEmpty()) {
+            System.out.println("No low stock items.");
+        } else {
+            for (var it : low) {
+                System.out.println(
+                        it.getProduct().getSku()
+                                + " | " + it.getProduct().getName()
+                                + " | qty=" + it.getQuantity()
+                                + " | min=" + it.getMinStock()
+                );
+
+
+            }
+
+        }
     }
 }
