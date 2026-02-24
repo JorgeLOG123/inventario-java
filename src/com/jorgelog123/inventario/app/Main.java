@@ -10,6 +10,7 @@ public class Main {
 
 
         // 1) Crear producto
+
         Product p = new Product("TEC_011", "Mouse", 3500.0);
         System.out.println("Producto: " + p);
 
@@ -36,6 +37,8 @@ public class Main {
         InventoryService service = new InventoryService();
 
         // 1) Crear y agregar producto al inventario
+        Product keyboard = new Product("TEC_012", "Keyboard", 12000.0);
+        service.addProduct(keyboard, 2, 5); // 2 <= 5 => low stock seguro
         Product mouse = new Product("TEC_011", "Mouse", 3500.0);
         service.addProduct(mouse, 10, 3);
 
@@ -83,7 +86,6 @@ public class Main {
         } catch (IllegalArgumentException e) {
             System.out.println("Error esperado (sku null): " + e.getMessage());
         }
-
         // --- LOW STOCK TEST ---
         System.out.println("\n=== LOW STOCK ITEMS ===");
 
@@ -91,7 +93,7 @@ public class Main {
 
         if (low.isEmpty()) {
             System.out.println("No low stock items.");
-        } else {
+        } else
             for (var it : low) {
                 System.out.println(
                         it.getProduct().getSku()
@@ -99,10 +101,13 @@ public class Main {
                                 + " | qty=" + it.getQuantity()
                                 + " | min=" + it.getMinStock()
                 );
-
+                System.out.println(it);
 
             }
 
-        }
     }
+
+
+
 }
+

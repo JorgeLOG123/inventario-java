@@ -60,7 +60,14 @@ public class InventoryItem {
 
     }
 
-
+    @Override
+    public String toString() {
+        return "InventoryItem{sku='" + product.getSku()
+                + "', name='" + product.getName()
+                + "', qty=" + quantity
+                + ", min=" + minStock
+                + "}";
+    }
 
 
 }
