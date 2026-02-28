@@ -1,27 +1,59 @@
-# Inventario Java (POO)
+# Inventory Java (OOP)
 
-Sistema de inventario por consola para practicar POO y lógica de negocio.
+Console-based inventory system built in Java to practice Object-Oriented Programming (OOP) and basic business logic.
 
-## Funcionalidades (MVP)
-- Alta de productos (SKU único)
-- Ingreso de stock (stock in)
-- Egreso de stock (stock out, no permite stock negativo)
-- Ajuste de stock
-- Consulta de stock por SKU
-- Listado de productos con stock bajo (<= mínimo)
-- Registro de movimientos (auditoría)
+## Features
+- Add products (unique SKU)
+- Stock in (increase quantity)
+- Stock out (decrease quantity, no negative stock)
+- Get stock by SKU
+- List low stock items (quantity <= minStock)
+- Input validation (handles invalid numeric input in the menu)
 
-## Reglas
-- SKU no puede repetirse
-- Cantidades deben ser > 0 (excepto ajuste directo)
-- No se permite stock negativo
-- Si SKU no existe, se informa error sin cerrar el programa
+## Project Structure
+- `domain/`
+    - `Product` (sku, name, price)
+    - `InventoryItem` (product, quantity, minStock + increase/decrease/isLowStock)
+- `service/`
+    - `InventoryService` (Map<sku, InventoryItem> + business rules)
+- `app/`
+    - `Main` (CLI menu using Scanner)
 
-## Cómo ejecutar
-1. Abrir el proyecto en IntelliJ
-2. Ejecutar `Main`
+## How to Run
+1. Open the project in IntelliJ IDEA
+2. Run: `Main`  
+   Path: `src/com/jorgelog123/inventario/app/Main.java`
 
-## Ejemplos
-- Crear producto: SKU=ABC123, name=Teclado, price=1000
-- Stock in: ABC123 +10
-- Stock out: ABC123 -3
+## Menu Options
+1. Add product
+2. Stock in
+3. Stock out
+4. List low stock
+0. Exit
+
+> Note: `Name` is read with `Scanner.next()`, so it should not contain spaces.
+
+## Example Session
+Add a product:
+- SKU: `TEC_012`
+- Name: `Keyboard`
+- Price: `12000`
+- Initial quantity: `2`
+- Min stock: `5`
+
+Then choose:
+- `4) List low stock` → should list `TEC_012` as low stock.
+
+## Error Handling
+- Duplicate SKU → `IllegalArgumentException`
+- Missing SKU → `IllegalArgumentException`
+- Invalid amounts (<= 0) → `IllegalArgumentException`
+- Stock out greater than available stock → `IllegalArgumentException`
+- Invalid numeric input in menu → handled with `InputMismatchException`
+
+## Git Workflow (quick)
+```bash
+git status
+git add -A
+git commit -m "message"
+git push

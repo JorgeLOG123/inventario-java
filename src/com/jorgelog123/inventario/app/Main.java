@@ -4,110 +4,140 @@ package com.jorgelog123.inventario.app;
 import com.jorgelog123.inventario.domain.InventoryItem;
 import com.jorgelog123.inventario.domain.Product;
 import com.jorgelog123.inventario.service.InventoryService;
+import java.util.InputMismatchException;
+import java.util.List;
+import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
 
-
-        // 1) Crear producto
-
-        Product p = new Product("TEC_011", "Mouse", 3500.0);
-        System.out.println("Producto: " + p);
-
-        // 2) Crear item de inventario con stock inicial.
-
-        InventoryItem item = new InventoryItem(p, 10, 5);
-        System.out.println("Stock Inicial: " + item.getQuantity());
-        System.out.println("¿El stock es bajo? " + item.isLowStock());
-
-        // 3) Caso válido: bajar stock
-        item.decrease(5);
-        System.out.println("Se saco de Stock " + item.getQuantity() + "unidades de este producto");
-        System.out.println("¿Bajo stock? " + item.isLowStock()); // esperado: true
-
-        // 4) Caso inválido: intentar bajar más de lo disponible
-        try {
-            item.decrease(999);
-            System.out.println("Esto no deberia imprimirse/");
-        } catch (IllegalArgumentException e) {
-            System.out.println("Error inesperado " + e.getMessage());
-        }
-
-
         InventoryService service = new InventoryService();
+        Scanner scanner = new Scanner(System.in);
 
-        // 1) Crear y agregar producto al inventario
-        Product keyboard = new Product("TEC_012", "Keyboard", 12000.0);
-        service.addProduct(keyboard, 2, 5); // 2 <= 5 => low stock seguro
-        Product mouse = new Product("TEC_011", "Mouse", 3500.0);
-        service.addProduct(mouse, 10, 3);
+        int option = -1;
 
-        // 2) Consultar stock inicial
-        System.out.println("Stock inicial TEC_011: " + service.getStock("TEC_011")); // esperado: 10
+        do {
+            printMenu();
 
-        // 3) Entrada de stock (stock in)
-        service.stockIn("TEC_011", 5);
-        System.out.println("Stock luego de stockIn(5): " + service.getStock("TEC_011")); // esperado: 15
+            // Leer opción de manera segura (si el user mete letras, no se rompe)
+            try {
+                option = scanner.nextInt();
+            } catch (InputMismatchException e) {
+                System.out.println("Invalid input. Please enter a number.");
+                scanner.next(); // consume token inválido
+                continue;       // vuelve al menú
+            }
 
-        // 4) Salida de stock (stock out)
-        service.stockOut("TEC_011", 8);
-        System.out.println("Stock luego de stockOut(8): " + service.getStock("TEC_011")); // esperado: 7
+            try {
+                switch (option) {
+                    case 1:
+                        handleAddProduct(scanner, service);
+                        break;
+                    case 2:
+                        handleStockIn(scanner, service);
+                        break;
+                    case 3:
+                        handleStockOut(scanner, service);
+                        break;
+                    case 4:
+                        handleListLowStock(service);
+                        break;
+                    case 0:
+                        System.out.println("Bye.");
+                        break;
+                    default:
+                        System.out.println("Invalid option.");
+                }
+            } catch (IllegalArgumentException e) {
+                System.out.println("Error: " + e.getMessage());
+            } catch (InputMismatchException e) {
+                // Por si se meten letras donde hay números dentro de los handlers
+                System.out.println("Invalid input. Please enter a valid number.");
+                scanner.next(); // consume token inválido
+            }
 
-        // 5) Caso inválido: SKU inexistente
-        try {
-            service.stockIn("NOPE_999", 1);
-        } catch (IllegalArgumentException e) {
-            System.out.println("Error esperado (SKU no existe): " + e.getMessage());
-        }
+        } while (option != 0);
 
-        // 6) Caso inválido: salida mayor al stock disponible
-        try {
-            service.stockOut("TEC_011", 999);
-        } catch (IllegalArgumentException e) {
-            System.out.println("Error esperado (stock insuficiente): " + e.getMessage());
-        }
+        scanner.close();
+    }
 
-        // 7) Caso inválido: duplicado de SKU
-        try {
-            service.addProduct(new Product("TEC_011", "Otro mouse", 4000.0), 1, 1);
-        } catch (IllegalArgumentException e) {
-            System.out.println("Error esperado (SKU duplicado): " + e.getMessage());
-        }
-        // 8) Caso inválido: sku en blanco (esto prueba la validación dentro de getItemOrThrow)
-        try {
-            service.getStock("   ");
-        } catch (IllegalArgumentException e) {
-            System.out.println("Error esperado (sku blank): " + e.getMessage());
-        }
+    private static void handleAddProduct(Scanner scanner, InventoryService service) {
 
-        // 9) Caso inválido: sku null (también prueba getItemOrThrow)
-        try {
-            service.stockIn(null, 1);
-        } catch (IllegalArgumentException e) {
-            System.out.println("Error esperado (sku null): " + e.getMessage());
-        }
-        // --- LOW STOCK TEST ---
+        System.out.print("SKU: ");
+        String sku = scanner.next();
+
+        System.out.print("Name (no spaces): ");
+        String name = scanner.next();
+
+        System.out.print("Price: ");
+        double price = scanner.nextDouble();
+
+        System.out.print("Initial quantity: ");
+        int initialQty = scanner.nextInt();
+
+        System.out.print("Min stock: ");
+        int minStock = scanner.nextInt();
+
+        Product product = new Product(sku, name, price);
+        service.addProduct(product, initialQty, minStock);
+
+        System.out.println("OK. Product added.");
+    }
+
+    private static void handleStockIn(Scanner scanner, InventoryService service) {
+
+        System.out.print("SKU: ");
+        String sku = scanner.next();
+
+        System.out.print("Amount to add: ");
+        int amount = scanner.nextInt();
+
+        service.stockIn(sku, amount);
+        int newStock = service.getStock(sku);
+
+        System.out.println("OK. New stock: " + newStock);
+    }
+
+    private static void handleStockOut(Scanner scanner, InventoryService service) {
+
+        System.out.print("SKU: ");
+        String sku = scanner.next();
+
+        System.out.print("Amount to remove: ");
+        int amount = scanner.nextInt();
+
+        service.stockOut(sku, amount);
+        int newStock = service.getStock(sku);
+
+        System.out.println("OK. New stock: " + newStock);
+    }
+
+    private static void handleListLowStock(InventoryService service) {
         System.out.println("\n=== LOW STOCK ITEMS ===");
 
-        var low = service.listLowStock();
+        List<InventoryItem> low = service.listLowStock();
 
         if (low.isEmpty()) {
             System.out.println("No low stock items.");
-        } else
-            for (var it : low) {
-                System.out.println(
-                        it.getProduct().getSku()
-                                + " | " + it.getProduct().getName()
-                                + " | qty=" + it.getQuantity()
-                                + " | min=" + it.getMinStock()
-                );
-                System.out.println(it);
-
+        } else {
+            for (InventoryItem it : low) {
+                System.out.println(it); // usa toString()
             }
-
+        }
     }
 
-
-
+    private static void printMenu() {
+        System.out.println("\n=== INVENTORY MENU ===");
+        System.out.println("1) Add product");
+        System.out.println("2) Stock in");
+        System.out.println("3) Stock out");
+        System.out.println("4) List low stock");
+        System.out.println("0) Exit");
+        System.out.print("Choose: ");
+    }
 }
+
+
+
+
 

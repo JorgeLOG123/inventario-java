@@ -51,7 +51,7 @@ public class InventoryItem {
             throw new IllegalArgumentException("amount must be > 0: " + amount);
         }
         if(amount > quantity){
-            throw new IllegalArgumentException("el monto no debe exceder la cantidad dispoible");
+            throw new IllegalArgumentException("the amount must not exceed the available amount");
         }
         quantity -= amount;
     }
